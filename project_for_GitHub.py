@@ -1,6 +1,6 @@
 import telebot
 
-bot = telebot.TeleBot('5300981291:AAHalKVv9AM5FdKOHG8YHI6z-Byvd6qIZUs')
+bot = telebot.TeleBot('your-key')
 
 @bot.message_handler(content_types=['text'])
 
