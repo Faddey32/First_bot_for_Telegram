@@ -1,25 +1,59 @@
 import telebot
+import requests as r
 from your_key import key
+
+def get_currencies():
+    url_codes = 'https://api.coinbase.com/v2/currencies'
+    response_code = r.get(url_codes)
+    data = response_code.json()
+    currencies = {}
+    for cur in data['data']:
+        currencies[cur['id']] = cur['name']
+
+    return currencies
+
+
+def get_rates(base, amount, target):
+    url_codes = f'https://api.coinbase.com/v2/exchange-rates?currency={base.upper()}'
+    try:
+        response_code = r.get(url_codes)
+        data = response_code.json()
+        rates = data['data']['rates']
+        result = amount * float(rates[target.upper()])
+        return result
+    except:
+        return None
+
+print(get_rates('USD', 10, 'EUR'))
 
 bot = telebot.TeleBot(key)
 
-@bot.message_handler(content_types=['text'])
 
-def get_text_messages(message):
-    if message.text == 'привет':
-        answer = 'привет, как я могу помочь?'
-        bot.send_message(message.from_user.id, answer)
-    elif message.text == '/help':
-        answer = 'Напиши привет'
-        bot.send_message(message.from_user.id, answer)
-    elif message.text == '/check-GitHub':
-        response = r.get('https://github.com')
-        if response.status_code == 200:
-            bot.send_message(message.from_user.id, 'Доступен')
-        else:
-            bot.send_message(message.from_user.id, 'недоступен')
-    else:
-        answer = 'я вас не понимаю'
-        bot.send_message(message.from_user.id, answer)
+@bot.message_handler(commands=['start'])  # что делаем, когда отправили /start
+def start_message(message):
+    with open('assets/greeting.txt', encoding='utf8') as file:
+        greeting = file.read()
+    bot.send_message(message.chat.id, greeting)
+
+
+@bot.message_handler(commands=['help'])  # что делаем, когда отправили /start
+def help_message(message):
+    with open('assets/help.txt', encoding='utf8') as file:
+        help_text = file.read()
+    bot.send_message(message.chat.id, help_text)
+
+
+@bot.message_handler(content_types=['text'])
+def get_codes(message):
+    codes = get_currencies()
+    if message.text.startswith('/cur_code'):  # если текст сообщения начинается с /cur_code
+        try:
+            user_message = message.text.split()  # превратить сообщение пользователя в список
+            answer = user_message[1].upper() in codes.keys()
+            bot.send_message(message.chat.id, codes[user_message[1].upper()])
+        except (ValueError, TypeError, IndexError, SyntaxError, KeyError):
+            bot.send_message(message.chat.id, 'Такой валюты нет!')
+
+
 
 bot.polling(none_stop=True, interval=0)
