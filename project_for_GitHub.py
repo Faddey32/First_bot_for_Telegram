@@ -53,6 +53,10 @@ def get_codes(message):
             bot.send_message(message.chat.id, codes[user_message[1].upper()])
         except (ValueError, TypeError, IndexError, SyntaxError, KeyError):
             bot.send_message(message.chat.id, 'Такой валюты нет!')
+    elif message.text.startswith('/exchange'):
+        user_message = message.text.split()
+        result = get_rates(base=user_message[2], amount=float(user_message[1]), target=user_message[3])
+        bot.send_message(message.chat.id, )
 
 
 
