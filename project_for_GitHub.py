@@ -1,6 +1,6 @@
 import telebot
 import requests as r
-from your_key import key
+
 
 def get_currencies():
     url_codes = 'https://api.coinbase.com/v2/currencies'
@@ -19,14 +19,13 @@ def get_rates(base, amount, target):
         response_code = r.get(url_codes)
         data = response_code.json()
         rates = data['data']['rates']
-        result = amount * float(rates[target.upper()])
+        result = round(amount * float(rates[target.upper()]), 2)
         return result
     except:
         return None
 
-print(get_rates('USD', 10, 'EUR'))
 
-bot = telebot.TeleBot(key)
+bot = telebot.TeleBot('')
 
 
 @bot.message_handler(commands=['start'])  # что делаем, когда отправили /start
@@ -55,13 +54,16 @@ def get_codes(message):
             bot.send_message(message.chat.id, 'Такой валюты нет!')
     elif message.text.startswith('/exchange'):
         user_message = message.text.split()
-        result = get_rates(base=user_message[2], amount=float(user_message[1]), target=user_message[3])
-        if (result is not None) and (result != 0.0):
-            answer = f'{user_message[1], user_message[2]} is {result, user_message[4]}'
+        result = get_rates(base=user_message[2],
+                           amount=float(user_message[1]),
+                           target=user_message[4])
+        if (result is not None) and (result != 0.0):  # если функция отдала значения и это не 0
+            base = codes[user_message[2].upper()]
+            target = codes[user_message[4].upper()]
+            answer = f'{user_message[1]} {base}\nэто {result} {target}💰'
             bot.send_message(message.chat.id, answer)
         else:
             bot.send_message(message.chat.id, 'Ошибка')
-
 
 
 bot.polling(none_stop=True, interval=0)
