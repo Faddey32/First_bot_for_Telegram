@@ -24,9 +24,7 @@ def get_rates(base, amount, target):
     except:
         return None
 
-
-bot = telebot.TeleBot('')
-
+bot = telebot.TeleBot('5300981291:AAHalKVv9AM5FdKOHG8YHI6z-Byvd6qIZUs')
 
 @bot.message_handler(commands=['start'])  # что делаем, когда отправили /start
 def start_message(message):
@@ -34,13 +32,11 @@ def start_message(message):
         greeting = file.read()
     bot.send_message(message.chat.id, greeting)
 
-
 @bot.message_handler(commands=['help'])  # что делаем, когда отправили /start
 def help_message(message):
     with open('assets/help.txt', encoding='utf8') as file:
         help_text = file.read()
     bot.send_message(message.chat.id, help_text)
-
 
 @bot.message_handler(content_types=['text'])
 def get_codes(message):
@@ -64,6 +60,5 @@ def get_codes(message):
             bot.send_message(message.chat.id, answer)
         else:
             bot.send_message(message.chat.id, 'Ошибка')
-
 
 bot.polling(none_stop=True, interval=0)
