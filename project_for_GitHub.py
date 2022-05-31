@@ -64,6 +64,15 @@ def help_message(message):
         help_text = file.read()
     bot.send_message(message.chat.id, help_text)
 
+@bot.message_handler(commands=['/buttons'])
+def button_message(message):
+    layout = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    b1 = telebot.types.KeyboardButton('кнопка1')
+    layout.add(b1)
+    b2 = telebot.types.KeyboardButton('кнопка2')
+    layout.add(b2)
+    bot.send_message(message.chat.id, 'Выберите', reply_markup=layout)
+
 @bot.message_handler(content_types=['text'])
 def get_codes(message):
     codes = get_currencies()
@@ -97,5 +106,7 @@ def get_codes(message):
         except TypeError:
             answer = 'Проверьте правильность написания сообщения'
             bot.send_message(message.chat.id, answer)
+    elif message.text == 'кнопка1':
+        bot.send_message(message.chat.id, 'Ну и ладно')
 
 bot.polling(none_stop=True, interval=0)
