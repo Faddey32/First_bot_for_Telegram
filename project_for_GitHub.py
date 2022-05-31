@@ -1,5 +1,6 @@
 import telebot
 import requests as r
+from datetime import datetime
 
 
 def get_currencies():
@@ -22,6 +23,31 @@ def get_rates(base, amount, target):
         result = round(amount * float(rates[target.upper()]), 2)
         return result
     except:
+        return None
+
+def get_wether(citi):
+    key = '1436b9b77788b942076019327b6abc1d'
+    url = 'https://api.openweathermap.org/data/2.5/forecast'
+    headers = {
+        'q': citi.capitalize(),
+        'appid': key,
+        'lang': 'ru',
+        'units': 'metric'
+    }
+    response = r.get(url, params=headers)
+    if response.status_code == 200:
+        data = response.json()
+        today = datetime.today()
+        forecats = []
+        for line in data['list']:
+            date = datetime.fromtimestamp(line['dt'])
+            if (date.hour in [9, 15, 21]) and (date.day in [today.day, today.day + 1] or date.day == 1):
+                day = {'date': datetime.strftime(date, '%d/%m, %H:%M'),
+                       'temp': line['main']['temp'],
+                       'weather': line['weather'][0]['description']}
+                forecats.append(day)
+        return forecats
+    else:
         return None
 
 bot = telebot.TeleBot('5300981291:AAHalKVv9AM5FdKOHG8YHI6z-Byvd6qIZUs')
@@ -60,5 +86,13 @@ def get_codes(message):
             bot.send_message(message.chat.id, answer)
         else:
             bot.send_message(message.chat.id, 'Ошибка')
+    elif message.text.startswith('/weather'):
+        user_massege = message.text.split()
+        forecast = get_wether(user_massege[1])
+        answer = ''
+        for line in forecast:
+            answer += f'{line["date"]}, {line["weather"]}, {line["temp"]}°\n'
+        print(answer)
+        bot.send_message(message.chat.id, answer)
 
 bot.polling(none_stop=True, interval=0)
