@@ -90,9 +90,12 @@ def get_codes(message):
         user_massege = message.text.split()
         forecast = get_wether(user_massege[1])
         answer = ''
-        for line in forecast:
-            answer += f'{line["date"]}, {line["weather"]}, {line["temp"]}°\n'
-        print(answer)
-        bot.send_message(message.chat.id, answer)
+        try:
+            for line in forecast:
+                answer += f'{line["date"]}, {line["weather"]}, {line["temp"]}°\n'
+            bot.send_message(message.chat.id, answer)
+        except TypeError:
+            answer = 'Проверьте правильность написания сообщения'
+            bot.send_message(message.chat.id, answer)
 
 bot.polling(none_stop=True, interval=0)
